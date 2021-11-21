@@ -5,6 +5,13 @@
 //  Created by Keith Crooc on 2021-11-20.
 //
 
+
+// CHALLENGE
+// 1. Update didReceive so it shows different UIAlertControllers depending on which action identifier was passed in.
+// 2. Add a second notification action to the alarm cateogry. Give it title "remind me later" and call scheduleLocal() so that the same alert is shown in 24 hours
+// 3. Update project 2 so that it reminds players to come back and play everday.
+
+
 import UIKit
 import UserNotifications
 
