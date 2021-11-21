@@ -7,8 +7,8 @@
 
 
 // CHALLENGE
-// 1. Update didReceive so it shows different UIAlertControllers depending on which action identifier was passed in.
-// 2. Add a second notification action to the alarm cateogry. Give it title "remind me later" and call scheduleLocal() so that the same alert is shown in 24 hours
+// 1. Update didReceive so it shows different UIAlertControllers depending on which action identifier was passed in. ✅
+// 2. Add a second notification action to the alarm cateogry. Give it title "remind me later" and call scheduleLocal() so that the same alert is shown in 24 hours ✅
 // 3. Update project 2 so that it reminds players to come back and play everday.
 
 
@@ -22,7 +22,7 @@ class ViewController: UIViewController, UNUserNotificationCenterDelegate {
         // Do any additional setup after loading the view.
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Register", style: .plain, target: self, action: #selector(registerLocal))
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Schedule", style: .plain, target: self, action: #selector(schedulelocal))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Schedule", style: .plain, target: self, action: #selector(scheduleLocal))
         
     }
 
@@ -39,7 +39,7 @@ class ViewController: UIViewController, UNUserNotificationCenterDelegate {
         }
     }
     
-    @objc func schedulelocal() {
+    @objc func scheduleLocal(remindLater: Bool) {
         registerCategories()
         
         let center = UNUserNotificationCenter.current()
@@ -73,13 +73,19 @@ class ViewController: UIViewController, UNUserNotificationCenterDelegate {
         
 //        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
         //        interval trigger > calendar trigger. (wait 5 seconds, THEN show this thing) in some cases
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
         
+        if remindLater == true {
+            let remindTrigger = UNTimeIntervalNotificationTrigger(timeInterval: 20, repeats: false)
+           let remindRequest = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: remindTrigger)
+           center.add(remindRequest)
+        } else {
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
+
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+            center.add(request)
+        }
         
-        
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        center.add(request)
-        
+//
     }
     
     func registerCategories() {
@@ -89,11 +95,22 @@ class ViewController: UIViewController, UNUserNotificationCenterDelegate {
         
         let show = UNNotificationAction(identifier: "show", title: "Tell Me More", options: .foreground)
 //        .foreground means when this button is tapped, launch app immediately
+//        here we create our own custom "Action" called 'show'.
         
-        let category = UNNotificationCategory(identifier: "alarm", actions: [show], intentIdentifiers: [])
+//      CHALLENGE
+//      2. Add a second notification action to the alarm cateogry. Give it title "remind me later" and call scheduleLocal() so that the same alert is shown in 24 hours
+        
+        let remindMe = UNNotificationAction(identifier: "remind", title: "Remind me Later")
+        
+        let category = UNNotificationCategory(identifier: "alarm", actions: [show, remindMe], intentIdentifiers: [])
         
         center.setNotificationCategories([category])
     }
+    
+    
+// CHALLENGE
+// 1. Update didReceive so it shows different UIAlertControllers depending on which action identifier was passed in.
+
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
@@ -105,8 +122,21 @@ class ViewController: UIViewController, UNUserNotificationCenterDelegate {
             switch response.actionIdentifier {
             case UNNotificationDefaultActionIdentifier:
                 print("Default Identifier")
+                
+                let ac = UIAlertController(title: "Default", message: "you opened the notification by tapping it! Now get lost", preferredStyle: .alert)
+                ac.addAction(UIAlertAction(title: "Dismiss", style: .cancel))
+                present(ac, animated: true)
+                
+                
             case "show":
                 print("show more info")
+                let ac = UIAlertController(title: "Hello There!", message: "Look at you fancy..you took 3 extra steps to get here. I'm so proud", preferredStyle: .alert)
+                ac.addAction(UIAlertAction(title: "Dismiss", style: .cancel))
+                present(ac, animated: true)
+                
+            case "remind":
+                let remindLater = true
+                scheduleLocal(remindLater: remindLater)
             default:
                 break
             }
